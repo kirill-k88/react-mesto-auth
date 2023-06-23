@@ -2,7 +2,7 @@
 
 ## Студент: Кацнельсон Кирилл
 
-### Ссылка на страницу: https://kirill-k88.github.io/mesto-react-auth/
+### Ссылка на страницу: https://kirill-k88.github.io/react-mesto-auth/
 
 ### Контент сайта:
 
