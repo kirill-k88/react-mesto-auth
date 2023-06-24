@@ -1,22 +1,16 @@
 import { useState } from 'react';
+import { useForm } from '../hooks/useForm';
 
 function AuthForm({ title, buttonName, buttonLoadingName, onSubmit }) {
   const [isLoading, setIsLoading] = useState(false);
-  const [inputValues, setInputValues] = useState({ password: '', email: '' });
+  const { values, handleChange, setValues } = useForm({});
 
   function handleSubmit(evt) {
     evt.preventDefault();
     setIsLoading(true);
-    onSubmit(inputValues, setIsLoading);
+    onSubmit(values, setIsLoading);
   }
 
-  function handleInputChange(evt) {
-    const { name, value } = evt.target;
-    setInputValues({
-      ...inputValues,
-      [name]: value
-    });
-  }
   return (
     <form className={`auth__form`} name={`register-form`} onSubmit={handleSubmit}>
       <h2 className="auth__title">{title}</h2>
@@ -26,8 +20,8 @@ function AuthForm({ title, buttonName, buttonLoadingName, onSubmit }) {
         placeholder="Email"
         required
         type="email"
-        value={inputValues.email || ''}
-        onChange={handleInputChange}
+        value={values.email || ''}
+        onChange={handleChange}
       />
       <input
         className="auth__input auth__input_content_password"
@@ -37,8 +31,8 @@ function AuthForm({ title, buttonName, buttonLoadingName, onSubmit }) {
         required
         minLength="7"
         maxLength="30"
-        value={inputValues.password || ''}
-        onChange={handleInputChange}
+        value={values.password || ''}
+        onChange={handleChange}
       />
       <button className="auth__button-submit common-link" type="submit">
         {!isLoading ? buttonName : buttonLoadingName}

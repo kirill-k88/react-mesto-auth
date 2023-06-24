@@ -4,6 +4,7 @@ import Main from './Main.js';
 import Footer from './Footer.js';
 import ImagePopup from './ImagePopup.js';
 import { CurrentUserContext } from '../contexts/CurrentUserContext.js';
+import { apiAuth } from '../utils/Auth';
 import { api } from '../utils/Api.js';
 import EditProfilePopup from './EditProfilePopup.js';
 import EditAvatarPopup from './EditAvatarPopup.js';
@@ -54,151 +55,110 @@ function App() {
     setIsConfirmPopupOpen(true);
   }
 
+  function handleSubmit(request, setIsLoading, handleError) {
+    setIsLoading(true);
+    request()
+      .catch(err => {
+        console.error(err);
+        handleError && handleError();
+      })
+      .finally(() => setIsLoading(false));
+  }
+
   function handleCardDelete(card, setIsLoading) {
-    api
-      .deleteCard(card._id)
-      .then(({ message }) => {
+    function makeRequest() {
+      return api.deleteCard(card._id).then(({ message }) => {
         if (message === 'Пост удалён') {
           setCards(cards.filter(item => item._id !== card._id));
           closeAllPopups();
         }
-      })
-      .catch(err => {
-        console.log(err);
-      })
-      .finally(() => {
-        setIsLoading(false);
       });
+    }
+
+    handleSubmit(makeRequest, setIsLoading);
   }
 
   function handleCardLike(card) {
     const isLiked = card.likes.some(item => item._id === currentUser._id);
 
-    (!isLiked ? api.sendLike(card._id) : api.deleteLike(card._id)).then(newCard => {
-      setCards(cards => cards.map(item => (item._id === card._id ? newCard : item)));
-    });
+    (!isLiked ? api.sendLike(card._id) : api.deleteLike(card._id))
+      .then(newCard => {
+        setCards(cards => cards.map(item => (item._id === card._id ? newCard : item)));
+      })
+      .catch(err => {
+        console.log(err);
+      });
   }
 
   function handleUpdateUser(userObject, setIsLoading) {
-    api
-      .modifyUserInfo(userObject)
-      .then(result => {
+    function makeRequest() {
+      return api.modifyUserInfo(userObject).then(result => {
         setCurrentUser(result);
         closeAllPopups();
-      })
-      .catch(err => {
-        console.log(err);
-      })
-      .finally(() => {
-        setIsLoading(false);
       });
+    }
+
+    handleSubmit(makeRequest, setIsLoading);
   }
 
   function handleUpdateAvatar(avatarObject, setIsLoading) {
-    api
-      .modifyAvatar(avatarObject)
-      .then(result => {
+    function makeRequest() {
+      return api.modifyAvatar(avatarObject).then(result => {
         setCurrentUser(result);
         closeAllPopups();
-      })
-      .catch(err => {
-        console.log(err);
-      })
-      .finally(() => {
-        setIsLoading(false);
       });
+    }
+
+    handleSubmit(makeRequest, setIsLoading);
   }
 
   function handleAddPlaceSubmit(cardObject, setInputValues, setIsLoading) {
-    api
-      .sendNewCard(cardObject)
-      .then(result => {
+    function makeRequest() {
+      return api.sendNewCard(cardObject).then(result => {
         setCards([result, ...cards]);
         setInputValues({ name: '', link: '' });
         closeAllPopups();
-      })
-      .catch(err => {
-        console.log(err);
-      })
-      .finally(() => {
-        setIsLoading(false);
       });
+    }
+
+    handleSubmit(makeRequest, setIsLoading);
   }
 
-  const baseURL = 'https://auth.nomoreparties.co';
-
   function handleRegister({ password, email }, setIsLoading) {
-    return fetch(`${baseURL}/signup`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ password, email })
-    })
-      .then(res => {
-        if (!res.ok) {
-          return Promise.reject(res.status);
-        }
-        return res.json();
-      })
-      .then(() => {
+    function makeRequest() {
+      return apiAuth.register(password, email).then(() => {
         navigate('/sing-in');
         setIsRegisterSuccess(true);
         setIsInfoTooltipOpen(true);
-      })
-      .catch(err => {
-        console.log(err);
-        setIsRegisterSuccess(false);
-        setIsInfoTooltipOpen(true);
-      })
-      .finally(() => {
-        setIsLoading(false);
       });
+    }
+
+    handleSubmit(makeRequest, setIsLoading, () => {
+      setIsRegisterSuccess(false);
+      setIsInfoTooltipOpen(true);
+    });
   }
 
   function handleLogin({ password, email }, setIsLoading) {
-    return fetch(`${baseURL}/signin`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ password, email })
-    })
-      .then(res => {
-        if (!res.ok) {
-          return Promise.reject(res.status);
-        }
-        return res.json();
-      })
-      .then(data => {
-        setLoggedIn(true);
-        localStorage.setItem('token', data.token);
-        return checkToken();
-      })
-      .then(checkAnswer => {
-        setEmail(checkAnswer.data.email);
-        navigate('/');
-      })
-      .catch(err => {
-        console.log(err);
-        setIsRegisterSuccess(false);
-        setIsInfoTooltipOpen(true);
-        setIsLoading(false);
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
-  }
+    function makeRequest() {
+      return apiAuth
+        .authorize(password, email)
+        .then(data => {
+          setLoggedIn(true);
+          localStorage.setItem('token', data.token);
+          return apiAuth.checkToken();
+        })
+        .then(checkAnswer => {
+          setEmail(checkAnswer.data.email);
+          navigate('/');
+        });
+    }
 
-  function checkToken() {
-    return fetch(`${baseURL}/users/me`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${localStorage.getItem('token')}`
-      }
-    }).then(res => {
-      if (!res.ok) {
-        localStorage.removeItem('token');
-        return Promise.reject(res.status);
-      }
-      return res.json();
+    handleSubmit(makeRequest, setIsLoading, () => {
+      localStorage.removeItem('token');
+      setIsRegisterSuccess(false);
+      setIsInfoTooltipOpen(true);
+      setIsLoading(false);
     });
   }
 
@@ -220,7 +180,8 @@ function App() {
 
   useEffect(() => {
     if (localStorage.getItem('token')) {
-      checkToken()
+      apiAuth
+        .checkToken()
         .then(checkAnswer => {
           setEmail(checkAnswer.data.email);
           setLoggedIn(true);
@@ -252,6 +213,24 @@ function App() {
         console.log(err);
       });
   }, []);
+
+  const isOpen =
+    isEditAvatarPopupOpen || isEditProfilePopupOpen || isAddPlacePopupOpen || selectedCard.link;
+
+  useEffect(() => {
+    function closeByEscape(evt) {
+      if (evt.key === 'Escape') {
+        closeAllPopups();
+      }
+    }
+    if (isOpen) {
+      // навешиваем только при открытии
+      document.addEventListener('keydown', closeByEscape);
+      return () => {
+        document.removeEventListener('keydown', closeByEscape);
+      };
+    }
+  }, [isOpen]);
 
   return (
     <CurrentUserContext.Provider value={currentUser}>

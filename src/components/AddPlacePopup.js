@@ -1,22 +1,15 @@
 import { useState } from 'react';
 import PopupWithForm from './PopupWithForm';
+import { useForm } from '../hooks/useForm';
 
 function AddPlacePopup({ isOpen, onClose, onAddPlace }) {
   const [isLoading, setIsLoading] = useState(false);
-  const [inputValues, setInputValues] = useState({ name: '', link: '' });
+  const { values, handleChange, setValues } = useForm({});
 
   function handleSubmit(evt) {
     evt.preventDefault();
     setIsLoading(true);
-    onAddPlace(inputValues, setInputValues, setIsLoading);
-  }
-
-  function handleInputChange(evt) {
-    const { name, value } = evt.target;
-    setInputValues({
-      ...inputValues,
-      [name]: value
-    });
+    onAddPlace(values, setValues, setIsLoading);
   }
 
   return (
@@ -38,8 +31,8 @@ function AddPlacePopup({ isOpen, onClose, onAddPlace }) {
         required
         minLength="2"
         maxLength="30"
-        value={inputValues.name || ''}
-        onChange={handleInputChange}
+        value={values.name || ''}
+        onChange={handleChange}
       />
       <span className="popup__input-error cardNameInput-error"></span>
       <input
@@ -48,8 +41,8 @@ function AddPlacePopup({ isOpen, onClose, onAddPlace }) {
         placeholder="Ссылка на картинку"
         required
         type="url"
-        value={inputValues.link || ''}
-        onChange={handleInputChange}
+        value={values.link || ''}
+        onChange={handleChange}
       />
       <span className="popup__input-error cardUrlInput-error"></span>
     </PopupWithForm>

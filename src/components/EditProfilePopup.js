@@ -1,28 +1,21 @@
 import { useState, useContext, useEffect } from 'react';
 import { CurrentUserContext } from '../contexts/CurrentUserContext';
 import PopupWithForm from './PopupWithForm';
+import { useForm } from '../hooks/useForm';
 
 function EditProfilePopup({ isOpen, onClose, onUpdateUser }) {
-  const [inputValues, setInputValues] = useState({ name: '', about: '' });
+  const { values, handleChange, setValues } = useForm({});
   const [isLoading, setIsLoading] = useState(false);
   const currentUser = useContext(CurrentUserContext);
-
-  function handleInputChange(evt) {
-    const { name, value } = evt.target;
-    setInputValues({
-      ...inputValues,
-      [name]: value
-    });
-  }
 
   function handleSubmit(evt) {
     evt.preventDefault();
     setIsLoading(true);
-    onUpdateUser(inputValues, setIsLoading);
+    onUpdateUser(values, setIsLoading);
   }
 
   useEffect(() => {
-    setInputValues({
+    setValues({
       name: currentUser.name,
       about: currentUser.about
     });
@@ -47,8 +40,8 @@ function EditProfilePopup({ isOpen, onClose, onUpdateUser }) {
         required
         minLength="2"
         maxLength="40"
-        value={inputValues.name || ''}
-        onChange={handleInputChange}
+        value={values.name || ''}
+        onChange={handleChange}
       />
       <span className="popup__input-error profileNameInput-error"></span>
       <input
@@ -59,8 +52,8 @@ function EditProfilePopup({ isOpen, onClose, onUpdateUser }) {
         required
         minLength="2"
         maxLength="200"
-        value={inputValues.about || ''}
-        onChange={handleInputChange}
+        value={values.about || ''}
+        onChange={handleChange}
       />
       <span className="popup__input-error ocupationInput-error"></span>
     </PopupWithForm>
