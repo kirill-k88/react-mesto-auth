@@ -127,7 +127,7 @@ function App() {
   function handleRegister({ password, email }, setIsLoading) {
     function makeRequest() {
       return apiAuth.register(password, email).then(() => {
-        navigate('/sing-in');
+        navigate('/sign-in');
         setIsRegisterSuccess(true);
         setIsInfoTooltipOpen(true);
       });
@@ -166,7 +166,7 @@ function App() {
     setLoggedIn(false);
     localStorage.removeItem('token');
     setEmail('');
-    navigate('/sing-in');
+    navigate('/sign-in');
   }
 
   function closeAllPopups() {
@@ -191,7 +191,7 @@ function App() {
           console.log(err);
         });
     } else {
-      navigate('/sing-in');
+      navigate('/sign-in');
     }
   }, []);
 
@@ -255,9 +255,9 @@ function App() {
               />
             }
           />
-          <Route path="/sing-up" element={<Register onRegister={handleRegister} />} />
-          <Route path="/sing-in" element={<Login onLogin={handleLogin} />} />
-          <Route path="*" element={<Navigate to="/sing-in" replace />} />
+          <Route path="/sign-up" element={<Register onRegister={handleRegister} />} />
+          <Route path="/sign-in" element={<Login onLogin={handleLogin} />} />
+          <Route path="*" element={<Navigate to="/sign-in" replace />} />
         </Routes>
         <EditProfilePopup
           isOpen={isEditProfilePopupOpen}

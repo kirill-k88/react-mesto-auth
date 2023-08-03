@@ -5,9 +5,9 @@ function Header({ email, loggedIn, onLogout }) {
   const location = useLocation();
 
   function getLink() {
-    if (location.pathname === '/sing-in' && !loggedIn) {
+    if (location.pathname === '/sign-in' && !loggedIn) {
       return (
-        <Link className="header__link common-link" to="/sing-up">
+        <Link className="header__link common-link" to="/sign-up">
           Регистрация
         </Link>
       );
@@ -19,7 +19,7 @@ function Header({ email, loggedIn, onLogout }) {
       );
     }
     return (
-      <Link className="header__link common-link" to="/sing-in">
+      <Link className="header__link common-link" to="/sign-in">
         Войти
       </Link>
     );

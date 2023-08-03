@@ -10,7 +10,7 @@ function Register({ onRegister }) {
         buttonLoadingName="Регистрация..."
         onSubmit={onRegister}
       />
-      <Link className="auth__link common-link" to="/sing-in">
+      <Link className="auth__link common-link" to="/sign-in">
         Уже зарегистрированы? Войти
       </Link>
     </div>
