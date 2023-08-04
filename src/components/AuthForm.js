@@ -3,7 +3,7 @@ import { useForm } from '../hooks/useForm';
 
 function AuthForm({ title, buttonName, buttonLoadingName, onSubmit }) {
   const [isLoading, setIsLoading] = useState(false);
-  const { values, handleChange, setValues } = useForm({});
+  const { values, handleChange } = useForm({});
 
   function handleSubmit(evt) {
     evt.preventDefault();
